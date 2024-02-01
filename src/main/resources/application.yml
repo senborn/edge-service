@@ -14,7 +14,7 @@ spring:
   cloud:
     gateway:
       httpclient:
-        connect-timeout: 2000
+        connect-timeout: 2000 # 2s
         response-timeout: 5s
         pool:
           type: elastic
@@ -40,6 +40,10 @@ spring:
               factor: 2
               basedOnPreviousValue: false
       routes:
+        - id: spa-route
+          uri: ${SPA_URL:http://localhost:9004}
+          predicates:
+            - Path=/,/*.css,/*.js,/favicon.ico
         - id: catalog-route
           uri: ${CATALOG_SERVICE_URL:http://localhost:9001}/books
           predicates:
@@ -67,6 +71,17 @@ spring:
     timeout: 10m
     redis:
       namespace: polar:edge
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: edge-service
+            client-secret: polar-keycloak-secret
+            scope: openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/PolarBookshop
 
 resilience4j:
   circuitbreaker:
